@@ -1,4 +1,4 @@
-{pkgs, tools, portMappings, shellHook, detach ? false}:
+{pkgs, tools, portMappings, shellHook, command ? null}:
 let portArgs = builtins.concatStringsSep " " (
       map (mapping: "-p " + (toString mapping.host)
                     + ":" + (toString mapping.container))
@@ -32,7 +32,8 @@ let portArgs = builtins.concatStringsSep " " (
     -e HOST_UID=$UID \
     $IMAGE \
     ${pkgs.bashInteractive}/bin/bash \
-      --init-file ${preface}/bin/preface
+      --init-file ${preface}/bin/preface \
+      ${if command == null then "" else ''-c "${command}"''}
   docker rm -f $(docker ps -a -q --filter="ancestor=$IMAGE")
   docker image rm $IMAGE
 '') pkgs tools
