@@ -31,7 +31,7 @@ let portArgs = builtins.concatStringsSep " " (
   done
   IMAGE=$(tar cv --files-from /dev/null | docker import -)
   mkdir -p .home
-  docker run -ti ${portArgs} $bindArgs ${extraMountDirs} \
+  docker run -ti ${portArgs} $bindArgs ${extraMountArgs} \
     -v ${preface}:${preface}:ro \
     -v ${shellHookFile}:${shellHookFile}:ro \
     -v ${pkgs.bashInteractive}/bin/bash:/bin/bash:ro \
