@@ -1,4 +1,4 @@
-{pkgs, tools, portMappings, shellHook ? "", command ? null}:
+{pkgs, tools, portMappings ? [], shellHook ? "", command ? null}:
 let portArgs = builtins.concatStringsSep " " (
       map (mapping: "-p " + (toString mapping.host)
                     + ":" + (toString mapping.container))
