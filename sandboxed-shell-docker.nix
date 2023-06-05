@@ -1,8 +1,18 @@
-{pkgs, tools, portMappings ? [], shellHook ? "", command ? null}:
+{
+  pkgs,
+  tools,
+  portMappings ? [],
+  shellHook ? "",
+  command ? null,
+  extraMountDirs ? []
+}:
 let portArgs = builtins.concatStringsSep " " (
       map (mapping: "-p " + (toString mapping.host)
                     + ":" + (toString mapping.container))
         portMappings
+    );
+    extraMountArgs = builtins.concatStringsSep " " (
+      map (dir: "-v ${dir}:${dir}") extraMountDirs
     );
     in
 (import ./sandboxed-shell.nix) (genericPreface:
@@ -21,7 +31,7 @@ let portArgs = builtins.concatStringsSep " " (
   done
   IMAGE=$(tar cv --files-from /dev/null | docker import -)
   mkdir -p .home
-  docker run -ti ${portArgs} $bindArgs \
+  docker run -ti ${portArgs} $bindArgs ${extraMountDirs} \
     -v ${preface}:${preface}:ro \
     -v ${shellHookFile}:${shellHookFile}:ro \
     -v ${pkgs.bashInteractive}/bin/bash:/bin/bash:ro \
