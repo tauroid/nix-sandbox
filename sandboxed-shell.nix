@@ -13,7 +13,6 @@ let toolpaths = map (tool: "${tool}")
       ulimit -n 32186
       mkdir /tmp
       chmod 777 /tmp
-      chown -R dev /home/dev
       cd /home/dev/sandbox
     '';
 in pkgs.mkShell {
