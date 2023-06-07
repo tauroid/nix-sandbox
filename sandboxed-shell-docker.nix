@@ -46,6 +46,7 @@ let portArgs = builtins.concatStringsSep " " (
     -v $(pwd):/home/dev/sandbox \
     -v $(pwd)/.home:/home/dev \
     -e HOST_UID=$UID \
+    ${envVarArgs} \
     $IMAGE \
     ${pkgs.bashInteractive}/bin/bash \
       --init-file ${preface}/bin/preface \
