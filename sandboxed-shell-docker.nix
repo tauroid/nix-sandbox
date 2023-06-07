@@ -4,7 +4,8 @@
   portMappings ? [],
   shellHook ? "",
   command ? null,
-  extraMountDirs ? []
+  extraMountDirs ? [],
+  hostPreface ? ""
 }:
 let portArgs = builtins.concatStringsSep " " (
       map (mapping: "-p " + (toString mapping.host)
@@ -31,6 +32,7 @@ let portArgs = builtins.concatStringsSep " " (
   done
   IMAGE=$(tar cv --files-from /dev/null | docker import -)
   mkdir -p .home
+  ${hostPreface}
   docker run -ti ${portArgs} $bindArgs ${extraMountArgs} \
     -v ${preface}:${preface}:ro \
     -v ${shellHookFile}:${shellHookFile}:ro \
