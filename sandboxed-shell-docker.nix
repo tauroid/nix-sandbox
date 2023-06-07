@@ -2,6 +2,7 @@
   pkgs,
   tools,
   portMappings ? [],
+  envVars ? [],
   shellHook ? "",
   command ? null,
   extraMountDirs ? [],
@@ -14,6 +15,9 @@ let portArgs = builtins.concatStringsSep " " (
     );
     extraMountArgs = builtins.concatStringsSep " " (
       map (dir: "-v ${dir}:${dir}") extraMountDirs
+    );
+    envVarArgs = builtins.concatStringsSep " " (
+      map (envVar: "-e ${envVar.name}=${envVar.value}") envVars
     );
     in
 (import ./sandboxed-shell.nix) (genericPreface:
