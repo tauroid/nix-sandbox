@@ -1,30 +1,63 @@
-specificScript: pkgs: tools:
+{
+  pkgs,
+  tools,
+  defineClosure ? false,
+  runInBareRootEnvironment,
+  shellHook,
+  command
+}:
 let toolpaths = map (tool: "${tool}")
-      (tools ++ [pkgs.bashInteractive pkgs.coreutils pkgs.util-linux]);
+      (tools ++ [pkgs.bashInteractive pkgs.coreutils pkgs.util-linux pkgs.gnugrep]);
     path = builtins.concatStringsSep ":" (
              map (toolpath: "${toolpath}/bin") toolpaths);
-    genericPreface = ''
+    shellHookFile = pkgs.writeScriptBin "shellHookFile" shellHook;
+    # expects /home/dev/sandbox to already exist and belong to
+    # HOST_UID (which is also expected to be defined)
+    enterNormalUserShell = ''
       export PATH="${pkgs.bashInteractive}/bin:${path}"
       export HOME=/home/dev
       export TERM=xterm-256color
-      mkdir /root
-      echo "root:x:0:0::/root:/bin/bash" > /etc/passwd
-      echo "dev:x:$HOST_UID:$HOST_UID::/home/dev:/bin/bash" >> /etc/passwd
+      mkdir -p /root
+      ROOT_LINE="root:x:0:0::/root:/bin/bash"
+      DEV_LINE="dev:x:$HOST_UID:$HOST_UID::/home/dev:/bin/bash"
+      if ! grep -Fxq "$ROOT_LINE" /etc/passwd; then
+          echo "$ROOT_LINE" > /etc/passwd
+      fi
+      if ! grep -Fxq "$DEV_LINE" /etc/passwd; then
+          echo "$DEV_LINE" > /etc/passwd
+      fi
       ulimit -n 32186
-      mkdir /tmp
+      mkdir -p /tmp
       chmod 777 /tmp
       cd /home/dev/sandbox
+      setpriv --reuid=$HOST_UID --regid=$HOST_UID \
+        --clear-groups --inh-caps=-all \
+        bash --init-file ${shellHookFile}/bin/shellHookFile \
+        ${if command == null then "" else ''-c "${command}"''}
     '';
+    scripts = pkgs.symlinkJoin {
+      name = "enterNormalUserShellScript";
+      paths = [
+        (pkgs.writeScriptBin "enterNormalUserShellScript" ''
+           set -e
+           ${enterNormalUserShell}
+         '')
+        shellHookFile
+      ];
+    };
 in pkgs.mkShell {
   shellHook = ''
     set -e
+  '' + (if defineClosure then ''
     full_closure=()
     for path in ${builtins.concatStringsSep " " toolpaths}; do
         readarray -t closure < <(nix path-info -r "$path")
         full_closure+=("''${closure[@]}")
     done
     readarray -t full_closure < <(printf "%s\n" "''${full_closure[@]}" | sort -u)
-    ${specificScript genericPreface}
+  '' else ''
+  '') + ''
+    ${runInBareRootEnvironment scripts}
     exit
   '';
 }
