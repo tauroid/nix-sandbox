@@ -1,4 +1,5 @@
 {
+  nixDockerImage,
   pkgs,
   tools,
   portMappings ? [],
@@ -19,15 +20,32 @@ let portArgs = builtins.concatStringsSep " " (
     envVarArgs = builtins.concatStringsSep " " (
       map (envVar: "-e ${envVar.name}=${envVar.value}") envVars
     );
-    dockerImage = pkgs.dockerTools.buildLayeredImageWithNixDb {
-      name = "nix-sandboxed-shell";
-      tag = "latest";
-      contents = tools;
-    };
 in (import ./sandboxed-shell.nix) {
-  runInBareRootEnvironment = script: ''
-
-  '';
+  runInBareRootEnvironment = script:
+    let dockerImage = pkgs.dockerTools.buildLayeredImageWithNixDb {
+          name = "nix-sandboxed-shell";
+          tag = "latest";
+          fromImage = nixDockerImage + "/image.tar.gz";
+          maxLayers = 102;
+          contents = tools;
+          config = {
+            Entrypoint = ["/root/.nix-profile/bin/bash" "-c" "${script}/bin/enterNormalUserShellScript"];
+          };
+        };
+    in ''
+      docker load -i ${dockerImage}
+      mkdir -p .home
+      ${hostPreface}
+      docker run -ti ${portArgs} ${extraMountArgs} \
+        -v ${script}:${script}:ro \
+        -v $(pwd):/home/dev/sandbox \
+        -v $(pwd)/.home:/home/dev \
+        -e HOST_UID=$UID \
+        ${envVarArgs} \
+        nix-sandboxed-shell:latest
+    '';
+  shellHook = shellHook;
+  command = command;
   pkgs = pkgs;
   tools = tools;
 }
