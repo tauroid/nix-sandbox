@@ -45,10 +45,10 @@ in (import ./sandboxed-shell.nix) {
         nix-sandboxed-shell:latest
     '';
   rootPreface = ''
-    chown -R dev /nix
+    chown -R dev /nix 2>&1 > /dev/null || true
   '';
   shellHook = shellHook;
   command = command;
   pkgs = pkgs;
-  tools = tools;
+  tools = tools ++ [pkgs.firejail];
 }
