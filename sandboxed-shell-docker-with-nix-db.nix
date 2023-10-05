@@ -44,6 +44,9 @@ in (import ./sandboxed-shell.nix) {
         ${envVarArgs} \
         nix-sandboxed-shell:latest
     '';
+  rootPreface = ''
+    chown -R dev /nix
+  '';
   shellHook = shellHook;
   command = command;
   pkgs = pkgs;
