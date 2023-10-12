@@ -35,7 +35,7 @@ let toolpaths = map (tool: "${tool}")
       chmod 777 /tmp
       ${rootPreface}
       cd /home/dev/sandbox
-      setpriv --reuid=$HOST_UID --regid=$HOST_UID \
+      setpriv --reuid=$HOST_UID --regid=$HOST_GID \
         --clear-groups --inh-caps=-all \
         bash --init-file ${shellHookFile}/bin/shellHookFile \
         ${if command == null then "" else ''-c "${command}"''}

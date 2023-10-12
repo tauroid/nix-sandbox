@@ -47,7 +47,7 @@ in (import ./sandboxed-shell.nix) {
     '';
   rootPreface = ''
     echo ummmmmmmm
-    chown -R dev /nix
+    chown -R $HOST_UID /nix
     ls -l /nix/var/nix/profiles/per-user
     echo whyyyy
     # > /dev/null 2>&1 || true
