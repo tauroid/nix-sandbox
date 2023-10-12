@@ -33,6 +33,7 @@ in (import ./sandboxed-shell.nix) {
           };
         };
     in ''
+      echo $GID
       docker load -i ${dockerImage}
       mkdir -p .home
       ${hostPreface}
