@@ -46,10 +46,7 @@ in (import ./sandboxed-shell.nix) {
         nix-sandboxed-shell:latest
     '';
   rootPreface = ''
-    echo ummmmmmmm
-    chown -R $HOST_UID /nix
-    ls -l /nix/var/nix/profiles/per-user
-    echo whyyyy
+    chown -R $HOST_UID /nix || true
     # > /dev/null 2>&1 || true
   '';
   shellHook = shellHook;
