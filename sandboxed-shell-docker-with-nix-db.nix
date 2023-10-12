@@ -33,8 +33,6 @@ in (import ./sandboxed-shell.nix) {
           };
         };
     in ''
-      echo $UID
-      echo $GID
       docker load -i ${dockerImage}
       mkdir -p .home
       ${hostPreface}
@@ -43,7 +41,7 @@ in (import ./sandboxed-shell.nix) {
         -v $(pwd):/home/dev/sandbox \
         -v $(pwd)/.home:/home/dev \
         -e HOST_UID=$UID \
-        -e HOST_GID=$GID \
+        -e HOST_GID=$UID \
         ${envVarArgs} \
         nix-sandboxed-shell:latest
     '';
