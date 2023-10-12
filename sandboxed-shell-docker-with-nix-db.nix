@@ -46,6 +46,7 @@ in (import ./sandboxed-shell.nix) {
         nix-sandboxed-shell:latest
     '';
   rootPreface = ''
+    echo ummmmmmmm
     chown -R dev /nix# > /dev/null 2>&1 || true
   '';
   shellHook = shellHook;
