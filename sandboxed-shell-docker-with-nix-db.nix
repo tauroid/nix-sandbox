@@ -40,7 +40,6 @@ in (import ./sandboxed-shell.nix) {
         -v ${script}:${script}:ro \
         -v $(pwd):/home/dev/sandbox \
         -v $(pwd)/.home:/home/dev \
-        -v $(pwd)/.nix:/nix \
         -e HOST_UID=$UID \
         -e HOST_GID=$UID \
         ${envVarArgs} \
