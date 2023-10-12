@@ -47,7 +47,9 @@ in (import ./sandboxed-shell.nix) {
     '';
   rootPreface = ''
     echo ummmmmmmm
-    chown -R dev /nix# > /dev/null 2>&1 || true
+    chown -R dev /nix
+    echo whyyyy
+    # > /dev/null 2>&1 || true
   '';
   shellHook = shellHook;
   command = command;
