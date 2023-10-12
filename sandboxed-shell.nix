@@ -20,12 +20,15 @@ let toolpaths = map (tool: "${tool}")
       export TERM=xterm-256color
       mkdir -p /root
       ROOT_LINE="root:x:0:0::/root:/bin/bash"
-      DEV_LINE="dev:x:$HOST_UID:$HOST_UID::/home/dev:/bin/bash"
+      DEV_LINE="dev:x:$HOST_UID:$HOST_GID::/home/dev:/bin/bash"
       if ! grep -Fxq "root:x:" /etc/passwd; then
           echo "$ROOT_LINE" >> /etc/passwd
       fi
       if ! grep -Fxq "dev:x:" /etc/passwd; then
           echo "$DEV_LINE" >> /etc/passwd
+      fi
+      if ! grep -Fxq "dev:x:" /etc/group; then
+          echo "dev:x:$HOST_GID" >> /etc/group
       fi
       ulimit -n 32186
       mkdir -p /tmp

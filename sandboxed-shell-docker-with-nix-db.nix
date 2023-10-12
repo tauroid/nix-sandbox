@@ -41,6 +41,7 @@ in (import ./sandboxed-shell.nix) {
         -v $(pwd):/home/dev/sandbox \
         -v $(pwd)/.home:/home/dev \
         -e HOST_UID=$UID \
+        -e HOST_GID=$GID \
         ${envVarArgs} \
         nix-sandboxed-shell:latest
     '';
