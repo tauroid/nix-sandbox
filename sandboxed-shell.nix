@@ -26,6 +26,8 @@ let toolpaths = map (tool: "${tool}")
       mkdir -p /root
       ROOT_LINE="root:x:0:0::/root:/bin/bash"
       DEV_LINE="dev:x:$HOST_UID:$HOST_GID::/home/dev:/bin/bash"
+      touch /etc/passwd
+      touch /etc/group
       if ! grep -Fxq "root:x:" /etc/passwd; then
           echo "$ROOT_LINE" >> /etc/passwd
       fi
