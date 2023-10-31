@@ -7,14 +7,10 @@
   shellHook,
   command
 }:
-let toolpaths = map (tool: "${tool}")
-      (tools ++ [pkgs.bashInteractive pkgs.coreutils pkgs.util-linux pkgs.gnugrep]);
-    path = builtins.concatStringsSep ":" (
-             map (toolpath: "${toolpath}/bin") toolpaths);
-    shellHookFile = pkgs.writeScriptBin "shellHookFile" shellHook;
+let shellHookFile = pkgs.writeScriptBin "shellHookFile" shellHook;
     # expects /home/dev/sandbox to already exist and belong to
     # HOST_UID (which is also expected to be defined)
-    enterNormalUserShell = ''
+    enterNormalUserShellScript = pkgs.writeScriptBin "enterNormalUserShellScript" ''
       export PATH="${pkgs.bashInteractive}/bin:${path}"
       export HOME=/home/dev
       export TERM=xterm-256color
@@ -40,16 +36,17 @@ let toolpaths = map (tool: "${tool}")
         bash --init-file ${shellHookFile}/bin/shellHookFile \
         ${if command == null then "" else ''-c "${command}"''}
     '';
-    scripts = pkgs.symlinkJoin {
-      name = "enterNormalUserShellScript";
-      paths = [
-        (pkgs.writeScriptBin "enterNormalUserShellScript" ''
-           set -e
-           ${enterNormalUserShell}
-         '')
+    toolpaths = map (tool: "${tool}")
+      (tools ++ [
+        pkgs.bashInteractive
+        pkgs.coreutils
+        pkgs.util-linux
+        pkgs.gnugrep
         shellHookFile
-      ];
-    };
+        enterNormalUserShellScript
+      ]);
+    path = builtins.concatStringsSep ":" (
+             map (toolpath: "${toolpath}/bin") toolpaths);
 in pkgs.mkShell {
   shellHook = ''
     set -e
@@ -62,7 +59,7 @@ in pkgs.mkShell {
     readarray -t full_closure < <(printf "%s\n" "''${full_closure[@]}" | sort -u)
   '' else ''
   '') + ''
-    ${runInBareRootEnvironment scripts}
+    ${runInBareRootEnvironment enterNormalUserShellScript}
     exit
   '';
 }

@@ -30,7 +30,6 @@ in (import ./sandboxed-shell.nix) {
     mkdir -p .home
     ${hostPreface}
     docker run -ti ${portArgs} $bindArgs ${extraMountArgs} \
-      -v ${script}:${script}:ro \
       -v ${pkgs.bashInteractive}/bin/bash:/bin/bash:ro \
       -v ${pkgs.bashInteractive}/bin/sh:/bin/sh:ro \
       -v ${pkgs.coreutils}/bin/env:/usr/bin/env:ro \
