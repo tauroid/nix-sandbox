@@ -7,7 +7,16 @@
   shellHook,
   command
 }:
-let shellHookFile = pkgs.writeScriptBin "shellHookFile" shellHook;
+let toolpaths = map (tool: "${tool}")
+      (tools ++ [
+        pkgs.bashInteractive
+        pkgs.coreutils
+        pkgs.util-linux
+        pkgs.gnugrep
+      ]);
+    path = builtins.concatStringsSep ":" (
+             map (toolpath: "${toolpath}/bin") toolpaths);
+    shellHookFile = pkgs.writeScriptBin "shellHookFile" shellHook;
     # expects /home/dev/sandbox to already exist and belong to
     # HOST_UID (which is also expected to be defined)
     enterNormalUserShellScript = pkgs.writeScriptBin "enterNormalUserShellScript" ''
@@ -36,23 +45,18 @@ let shellHookFile = pkgs.writeScriptBin "shellHookFile" shellHook;
         bash --init-file ${shellHookFile}/bin/shellHookFile \
         ${if command == null then "" else ''-c "${command}"''}
     '';
-    toolpaths = map (tool: "${tool}")
-      (tools ++ [
-        pkgs.bashInteractive
-        pkgs.coreutils
-        pkgs.util-linux
-        pkgs.gnugrep
-        shellHookFile
-        enterNormalUserShellScript
-      ]);
-    path = builtins.concatStringsSep ":" (
-             map (toolpath: "${toolpath}/bin") toolpaths);
+    scriptpaths = map (script: "${script}")
+      [shellHookFile enterNormalUserShellScript];
 in pkgs.mkShell {
   shellHook = ''
     set -e
   '' + (if defineClosure then ''
     full_closure=()
     for path in ${builtins.concatStringsSep " " toolpaths}; do
+        readarray -t closure < <(nix path-info -r "$path")
+        full_closure+=("''${closure[@]}")
+    done
+    for path in ${builtins.concatStringsSep " " scriptpaths}; do
         readarray -t closure < <(nix path-info -r "$path")
         full_closure+=("''${closure[@]}")
     done
