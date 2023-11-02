@@ -38,6 +38,7 @@ in (import ./sandboxed-shell.nix) {
       -e HOST_UID=$UID \
       -e HOST_GID=$UID \
       ${envVarArgs} \
+      --add-host=host.docker.internal:host-gateway \
       $IMAGE \
       ${pkgs.bashInteractive}/bin/bash \
         -c ${script}/bin/enterNormalUserShellScript
