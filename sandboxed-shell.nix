@@ -46,6 +46,7 @@ let toolpaths = map (tool: "${tool}")
         --clear-groups --inh-caps=-all \
         bash --init-file ${shellHookFile}/bin/shellHookFile \
         ${if command == null then "" else ''-c "${command}"''}
+      exit
     '';
     scriptpaths = map (script: "${script}")
       [shellHookFile enterNormalUserShellScript];

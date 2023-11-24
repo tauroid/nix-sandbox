@@ -36,14 +36,14 @@ in (import ./sandboxed-shell.nix) {
       -v ${pkgs.coreutils}/bin/env:/usr/bin/env:ro \
       -v $(pwd):/home/dev/sandbox \
       -v $(pwd)/.home:/home/dev \
+      -v ${script}/bin/enterNormalUserShellScript:/root/.bashrc \
       -e HOST_UID=$UID \
       -e HOST_GID=$UID \
       ${envVarArgs} \
       --add-host=host.docker.internal:host-gateway \
       ${builtins.concatStringsSep " " extraDockerArgs} \
       $IMAGE \
-      ${pkgs.bashInteractive}/bin/bash \
-        -c ${script}/bin/enterNormalUserShellScript
+      ${pkgs.bashInteractive}/bin/bash
     docker rm -f $(docker ps -a -q --filter="ancestor=$IMAGE")
     docker image rm $IMAGE
   '';
